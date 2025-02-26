@@ -20,6 +20,6 @@ class Pokemon {
 
   static String _getIdFromUrl(String url) {
     final segments = url.split('/');
-    return segments[segments.length - 2]; // Obtém o ID do Pokémon pela URL
+    return segments[segments.length - 2];
   }
 }

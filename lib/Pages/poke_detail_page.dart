@@ -4,7 +4,7 @@ import 'package:pokedex/models/pokemon_summary.dart';
 
 class PokeDetailPage extends StatefulWidget {
   final Pokemon pokemon;
-  const PokeDetailPage({Key? key, required this.pokemon}) : super(key: key);
+  const PokeDetailPage({super.key, required this.pokemon});
 
   @override
   State<PokeDetailPage> createState() => _PokeDetailPageState();
@@ -14,11 +14,82 @@ class _PokeDetailPageState extends State<PokeDetailPage> {
   Map<String, dynamic>? _details;
   List<Map<String, dynamic>> _evolutions = [];
   bool _isLoading = true;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
     _fetchDetails();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _scaffoldKey,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: 300,
+                  pinned: true,
+                  backgroundColor: _getTypeColor(),
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  flexibleSpace: FlexibleSpaceBar(
+                    centerTitle: true,
+                    title: Text(
+                      widget.pokemon.name.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    background: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(color: _getTypeColor()),
+                        Positioned(
+                          bottom: 20,
+                          child: Image.network(
+                            widget.pokemon.imageUrl,
+                            width: 180,
+                            height: 180,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildTypeRow(),
+                        const SizedBox(height: 16),
+                        _buildInfoRow(),
+                        const SizedBox(height: 16),
+                        _buildStats(),
+                        const SizedBox(height: 16),
+                        _buildAbilities(),
+                        const SizedBox(height: 16),
+                        _buildMoves(),
+                        const SizedBox(height: 16),
+                        _buildEvolutions(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
   }
 
   Future<void> _fetchDetails() async {
@@ -128,73 +199,23 @@ class _PokeDetailPageState extends State<PokeDetailPage> {
     return Colors.green;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  expandedHeight: 300,
-                  pinned: true,
-                  backgroundColor: _getTypeColor(),
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    title: Text(
-                      widget.pokemon.name.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    background: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(color: _getTypeColor()),
-                        Positioned(
-                          bottom: 20,
-                          child: Image.network(
-                            widget.pokemon.imageUrl,
-                            width: 180,
-                            height: 180,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        _buildTypeRow(),
-                        const SizedBox(height: 16),
-                        _buildInfoRow(),
-                        const SizedBox(height: 16),
-                        _buildStats(),
-                        const SizedBox(height: 16),
-                        _buildAbilities(),
-                        const SizedBox(height: 16),
-                        _buildMoves(),
-                        const SizedBox(height: 16),
-                        _buildEvolutions(),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-    );
+  Icon _getStatIcon(String statName) {
+    switch (statName.toLowerCase()) {
+      case 'hp':
+        return const Icon(Icons.favorite, color: Colors.red, size: 16);
+      case 'attack':
+        return const Icon(Icons.flash_on, color: Colors.orange, size: 16);
+      case 'defense':
+        return const Icon(Icons.shield, color: Colors.blue, size: 16);
+      case 'special-attack':
+        return const Icon(Icons.bolt, color: Colors.deepOrange, size: 16);
+      case 'special-defense':
+        return const Icon(Icons.security, color: Colors.blueGrey, size: 16);
+      case 'speed':
+        return const Icon(Icons.speed, color: Colors.green, size: 16);
+      default:
+        return const Icon(Icons.star, color: Colors.grey, size: 16);
+    }
   }
 
   Widget _buildTypeRow() {
@@ -219,22 +240,55 @@ class _PokeDetailPageState extends State<PokeDetailPage> {
     );
   }
 
+  void _showSettingsPanel(context) {
+    _scaffoldKey.currentState?.showBottomSheet(
+      (ctx) {
+        return Container(
+          height: 200,
+          color: Colors.amber,
+          child: Stack(children: [
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Text('Texto'),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 0,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(Icons.close),
+              ),
+            )
+          ]),
+        );
+      },
+    );
+  }
+
   Widget _buildInfoRow() {
     final weightRaw = _details?['weight'] ?? 0;
     final heightRaw = _details?['height'] ?? 0;
     final weight = (weightRaw / 10).toStringAsFixed(1);
     final height = (heightRaw / 10).toStringAsFixed(1);
     return Card(
+      clipBehavior: Clip.hardEdge,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _infoColumn('Peso', '$weight kg'),
-            _infoColumn('Altura', '$height m'),
-          ],
+      child: InkWell(
+        onTap: () => _showSettingsPanel(context),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _infoColumn('Peso', '$weight kg'),
+              _infoColumn('Altura', '$height m'),
+            ],
+          ),
         ),
       ),
     );
@@ -270,8 +324,14 @@ class _PokeDetailPageState extends State<PokeDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(statName,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Row(
+                  children: [
+                    _getStatIcon(statName),
+                    const SizedBox(width: 4),
+                    Text(statName,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),

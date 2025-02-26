@@ -29,7 +29,7 @@ class _PokeHomePageState extends State<PokeHomePage> {
       setState(() {
         listaDePokemon =
             (response.data['results'] as List).asMap().entries.map((entry) {
-          final index = entry.key + 1; // ID correto do Pokémon
+          final index = entry.key + 1;
           final data = entry.value as Map<String, dynamic>;
           return Pokemon(
             name: data['name'],
@@ -52,7 +52,13 @@ class _PokeHomePageState extends State<PokeHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Lista de Pokémon")),
+      backgroundColor: Colors.grey[200],
+      appBar: AppBar(
+        title: const Text("Lista de Pokémon"),
+        backgroundColor: Colors.deepPurple,
+        elevation: 4,
+        centerTitle: true,
+      ),
       body: _buildBody(),
     );
   }
@@ -62,17 +68,19 @@ class _PokeHomePageState extends State<PokeHomePage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return ListView.builder(
-      itemCount: listaDePokemon.length,
-      itemBuilder: (context, index) {
-        final pokemon = listaDePokemon[index];
-
-        return MouseRegion(
-          cursor: SystemMouseCursors
-              .click, // Garante que o cursor muda para a mãozinha
-          child: ListTile(
-            title: Text(pokemon.name),
-            leading: Image.network(pokemon.imageUrl, width: 50, height: 50),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GridView.builder(
+        itemCount: listaDePokemon.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.9,
+        ),
+        itemBuilder: (context, index) {
+          final pokemon = listaDePokemon[index];
+          return GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
@@ -81,9 +89,50 @@ class _PokeHomePageState extends State<PokeHomePage> {
                 ),
               );
             },
-          ),
-        );
-      },
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 4,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.orangeAccent.shade100,
+                      Colors.yellowAccent.shade100
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Hero(
+                      tag: pokemon.name,
+                      child: Image.network(
+                        pokemon.imageUrl,
+                        width: 80,
+                        height: 80,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      pokemon.name.toUpperCase(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

@@ -28,9 +28,7 @@ class _PokeHomePageStatefullState extends State<PokeHomePageStatefull> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Lista de Pokemon")
-      ),
+      appBar: AppBar(title: Text("Lista de Pokemon")),
       body: _buildBody(),
     );
   }
@@ -39,12 +37,13 @@ class _PokeHomePageStatefullState extends State<PokeHomePageStatefull> {
     return isCarregando
         ? CircularProgressIndicator()
         : ListView.builder(
-          itemCount: listaDePokemon.length, 
-          itemBuilder: (context, index){
-            return ListTile(
-              title: Text(listaDePokemon[index],),
-            );
-          }
-        ); 
+            itemCount: listaDePokemon.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(
+                  listaDePokemon[index],
+                ),
+              );
+            });
   }
 }
